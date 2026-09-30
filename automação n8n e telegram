@@ -1,0 +1,220 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "10eT35JLXZX2QXQiZ56q5GqbGl_iA-tKK-GYojuaia7Q",
+          "mode": "list",
+          "cachedResultName": "criação de sinais ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10eT35JLXZX2QXQiZ56q5GqbGl_iA-tKK-GYojuaia7Q/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 989894866,
+          "mode": "list",
+          "cachedResultName": "Base de under",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10eT35JLXZX2QXQiZ56q5GqbGl_iA-tKK-GYojuaia7Q/edit#gid=989894866"
+        },
+        "options": {
+          "outputFormatting": {
+            "values": {
+              "general": "UNFORMATTED_VALUE",
+              "date": "FORMATTED_STRING"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -448,
+        -176
+      ],
+      "id": "cf52fbfc-6435-48dc-a843-28103507cb76",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JwAIDNrjhOVRKYJX",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "sum",
+              "field": "Stake"
+            },
+            {
+              "field": "No"
+            }
+          ]
+        },
+        "fieldsToSplitBy": "Player Id, Champ name, Market types ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        -32,
+        -96
+      ],
+      "id": "74c4c201-10d5-4533-88cb-c720bbe22eb8",
+      "name": "Summarize"
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "sum_Stake",
+              "order": "descending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        288,
+        -192
+      ],
+      "id": "6fb7a523-7967-402d-bafb-f2a5b1dfcf9d",
+      "name": "Sort"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1a965941-f69f-4637-a2fc-4ae730003fdb",
+              "name": "=Mensagem ",
+              "value": "=🚨 *RELATÓRIO DE MAIORES OFENSORES (MÊS 04)* 🚨\n\n👤 *Player ID:* {{ $json.Player_Id }}\n🏆 *Campeonato:* {{ $json.Champ_name }}\n🎯 *Mercado:* {{ $json.Market_types }}\n💰 *Total Apostado:* R$ {{ $json.sum_Stake }}\n📊 *Total de Apostas:* {{ $json.count_No }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        608,
+        80
+      ],
+      "id": "f4543257-bb4f-4db8-9364-f42a172c04ed",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "chatId": "5078125601",
+        "text": "={{ $json['Mensagem '] }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        992,
+        -80
+      ],
+      "id": "bf6aea96-ee02-47b4-9a28-7cac2346380f",
+      "name": "Send a text message",
+      "webhookId": "84ac23fe-efde-4510-a44d-8ef9c988fa1e",
+      "credentials": {
+        "telegramApi": {
+          "id": "97Nx7d1mm6O8LzRA",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "maxItems": 20
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        608,
+        -80
+      ],
+      "id": "efc04ca3-e382-4622-a7a3-fe9c40be6887",
+      "name": "Limit"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize": {
+      "main": [
+        [
+          {
+            "node": "Sort",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "65ad8ed3-3b69-4ea9-986a-39bdc80b7f13",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fc3da28ea9f7db0b36420f3980b186779b71239f782a7cd8ea9e09f700ad20c1"
+  },
+  "nodeGroups": [],
+  "id": "MsefZsp2EgyrsEaB",
+  "tags": []
+}
